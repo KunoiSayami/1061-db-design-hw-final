@@ -49,12 +49,12 @@
 				//exit(0);
 				//die();
 			}
+		}
 		else
 			if (isset($_POST['delete'])){
 				mysqli_query($db,'DELETE FROM `TABLE_NAME_TO_BE_DONE` WHERE `id` ='.$_POST['delete'].';');
 				header('Location:future.php');
 			}
-	}
 ?>
 <head>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
