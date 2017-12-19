@@ -3,8 +3,8 @@
 <html>
 	<?php
 	class InvalidData extends Exception { }
-	$regex = '/^[a-zA-Z0-9]+$/';
-	$regex_email = '/^[a-zA-Z0-9@\.]+$/';
+	$regex = '/^[a-zA-Z0-9]{1,10}$/';
+	$regex_email = '/^[a-zA-Z0-9@\.]{1,30}$/';
 	//echo $_SERVER['REQUEST_METHOD'];
 
 	$EDIT_BUTTON = 'Post';
@@ -14,7 +14,7 @@
 	mysqli_query($db,'SET NAMES utf8;');
 	$method = $POST_NEW_BUTTON;
 	if (isset($_GET['id'])){
-		if (!($r = mysqli_query($db,'SELECT * FROM `TABLE_NAME_TO_BE_DONE` WHERE `id` ='.$_GET['id'].';')))
+		if (!mysqli_fetch_array($r = mysqli_query(($db,'SELECT * FROM `TABLE_NAME_TO_BE_DONE` WHERE `id` ='.$_GET['id'].';')))
 			header('Location:future.php');
 		$r = mysqli_fetch_array($r);
 		$method = $EDIT_BUTTON;
@@ -22,19 +22,20 @@
 	if (isset($_POST['submit'])){
 		if ($_POST['submit'] == 'Flush'){
 			mysqli_query($db,'DELETE FROM `TABLE_NAME_TO_BE_DONE`;');
+			mysqli_query($db,'ALTER TABLE `TABLE_NAME_TO_BE_DONE` AUTO_INCREMENT=1;');
 			header('Location:future.php');
 		} 
-	else
-	// Process post
+		else
+		// Process post
 		if (isset($_POST['name']) && isset($_POST['email']) && isset($_POST['msg']))
 			try{
 				if (!preg_match($regex,$_POST['name']))
-					throw InvalidData('Invalid field `name`');
+					throw new InvalidData('Invalid field `name`');
 				if (!preg_match($regex_email,$_POST['email']))
-					throw InvalidData('Invalid field `email`');
+					throw new InvalidData('Invalid field `email`');
 				$name = $_POST['name'];
 				$email = $_POST['email'];
-				$msg = str_replace('\'','\'\'',$_POST['msg']);
+				$msg = str_replace('\\','\\\\',str_replace('\'','\'\'',$_POST['msg']));
 				//echo 'INSERT INTO `TABLE_NAME_TO_BE_DONE` (`name`,`email`,`message`) VALUES ('.$name.','.$email.','.$msg.');';
 				if ($_POST['submit'] == $POST_NEW_BUTTON)
 					mysqli_query($db,'INSERT INTO `TABLE_NAME_TO_BE_DONE` (`name`,`email`,`message`,`time`) VALUES (\''.$name.'\',\''.$email.'\',\''.$msg.'\',CURRENT_TIMESTAMP);');
@@ -43,18 +44,18 @@
 				mysqli_commit($db);
 				header('Location:future.php');
 			} catch (InvalidData $e){
-				header('Location:future.php');
+				echo "Caught exception: ", $e->getMessage(),"\n</html>";
 				mysqli_close($db);
-				//http_response_code(403);
+				http_response_code(400);
 				//exit(0);
-				//die();
+				die();
 			}
 		}
-		else
-			if (isset($_POST['delete'])){
-				mysqli_query($db,'DELETE FROM `TABLE_NAME_TO_BE_DONE` WHERE `id` ='.$_POST['delete'].';');
-				header('Location:future.php');
-			}
+	else
+		if (isset($_POST['delete'])){
+			mysqli_query($db,'DELETE FROM `TABLE_NAME_TO_BE_DONE` WHERE `id` ='.$_POST['delete'].';');
+			header('Location:future.php');
+		}
 ?>
 <head>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>

@@ -17,6 +17,7 @@
 
 DROP DATABASE IF EXISTS `comm`;
 CREATE TABLE `comm` CHARACTER SET 'utf8' COLLATE 'utf8_general_ci';
+USE `comm`;
 
 --
 -- Table structure for table `base`
@@ -25,14 +26,15 @@ CREATE TABLE `comm` CHARACTER SET 'utf8' COLLATE 'utf8_general_ci';
 DROP TABLE IF EXISTS `base`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `base` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` tinytext NOT NULL,
-  `email` text NOT NULL,
-  `body` mediumtext NOT NULL,
-  `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+CREATE TABLE `tbA5230422` (
+	`id` INT(11) NOT NULL AUTO_INCREMENT,
+	`name` VARCHAR(10) NULL DEFAULT NULL COLLATE 'utf8_unicode_ci',
+	`email` VARCHAR(30) NULL DEFAULT NULL COLLATE 'utf8_unicode_ci',
+	`message` TEXT NULL COLLATE 'utf8_unicode_ci',
+	`time` DATETIME NULL DEFAULT NULL,
+	PRIMARY KEY (`id`)
+)
+ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
