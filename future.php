@@ -6,11 +6,41 @@
 	$regex_email = '/^[a-zA-Z0-9@\.]{1,30}$/';
 	//echo $_SERVER['REQUEST_METHOD'];
 
+	function replace_msg($msg){
+		//return $msg;
+		return str_replace('"','&quot;',str_replace('\'','&apos;',str_replace(' ','&nbsp;',
+			str_replace('>','&gt;',str_replace('<','&lt;',str_replace('&amp;','&',$msg))))));
+	}
+
+	function sql_replace_msg($msg){
+		return str_replace('`','\`',str_replace('\\','\\\\',str_replace('\'','\'\'',$msg)));
+	}
+	
+	function test_func($num,$errmsg){
+		if ( ! preg_match('/^\d+$/',$num) )
+			throw new InvalidData($errmsg);
+	}
+
 	$USER_STRING = "";
 	$DATABASE_NAME = '';
 	$TABLE_NAME = '';
 	$EDIT_BUTTON = 'Post';
 	$POST_NEW_BUTTON = 'Insert';
+
+	// Data check
+	try {
+		if (isset($_GET['id']))
+			test_func($_GET['id'],"Invalid `id` in get method");
+		else if ($_POST['submit'] == $EDIT_BUTTON && isset($_POST['id']))
+			test_func($_GET['id'],"Invalid `id` in post method");
+		else if (isset($_POST['delete']))
+			test_func($_POST['delete'],"Invalid `id` in post method");
+	} catch (InvalidData $e){
+		echo "Caught exception: ", $e->getMessage(),"\n</html>";
+		http_response_code(400);
+		die();
+	}
+
 
 	$db = mysqli_connect('localhost','php','root',$DATABASE_NAME);
 	mysqli_query($db,'SET NAMES utf8;');
@@ -41,7 +71,7 @@
 						throw new InvalidData('Invalid field `email`');
 					$name = $_POST['name'];
 					$email = $_POST['email'];
-					$msg = str_replace('`','\`',str_replace('\\','\\\\',str_replace('\'','\'\'',$_POST['msg'])));
+					$msg = sql_replace_msg($_POST['msg']);//str_replace('`','\`',str_replace('\\','\\\\',str_replace('\'','\'\'',$_POST['msg'])));
 					//echo 'INSERT INTO '.$TABLE_NAME.' (`name`,`email`,`message`) VALUES ('.$name.','.$email.','.$msg.');';
 					if ($_POST['submit'] == $POST_NEW_BUTTON)
 						mysqli_query($db,'INSERT INTO '.$TABLE_NAME.' (`name`,`email`,`message`,`time`) VALUES (\''.$name.'\',\''.$email.'\',\''.$msg.'\',CURRENT_TIMESTAMP);');
@@ -124,12 +154,14 @@
 	}
 	echo "<input type=\"submit\" name=\"submit\" value=\"$method\"/>      ";
 ?>
-	<input type="submit" name="submit" value="Clear Database"><br>
+	<!--input type="submit" name="submit" value="Clear Database"--><br>
 <?php
 	if (!isset($_GET['search']))
 		$r = mysqli_query($db,'SELECT * FROM '.$TABLE_NAME.' ORDER BY `time` ASC;');
-	else
-		$r = mysqli_query($db,'SELECT * FROM '.$TABLE_NAME.' WHERE `name` LIKE \'%'.$_GET['search'].'%\' OR `email` LIKE \'%'.$_GET['search'].'%\' OR `message` LIKE \'%'.$_GET['search'].'%\' ORDER BY `time` ASC;');
+	else {
+		$search_str = sql_replace_msg($_GET['search']);
+		$r = mysqli_query($db,'SELECT * FROM '.$TABLE_NAME.' WHERE `name` LIKE \'%'.$search_str.'%\' OR `email` LIKE \'%'.$search_str.'%\' OR `message` LIKE \'%'.$search_str.'%\' ORDER BY `time` ASC;');
+	}
 	mysqli_close($db);
 ?>
 </form>
@@ -142,7 +174,7 @@
 			echo "<tr>";
 			echo "<td>$a[1]</td>";
 			echo "<td>$a[2]</td>";
-			echo "<td>$a[3]</td>";
+			echo "<td>".replace_msg($a[3])."</td>";
 			echo "<td>$a[4]</td>";
 			echo "<td>";
 			echo "<input type=\"button\" value=\"Edit\" onclick=\"gets($a[0])\"> ";
