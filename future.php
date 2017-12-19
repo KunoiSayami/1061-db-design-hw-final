@@ -14,9 +14,9 @@
 	mysqli_query($db,'SET NAMES utf8;');
 	$method = $POST_NEW_BUTTON;
 	if (isset($_GET['id'])){
-		if (!mysqli_fetch_array($r = mysqli_query(($db,'SELECT * FROM `TABLE_NAME_TO_BE_DONE` WHERE `id` ='.$_GET['id'].';')))
+		if (!mysqli_fetch_array(mysqli_query(($db,'SELECT * FROM `TABLE_NAME_TO_BE_DONE` WHERE `id` ='.$_GET['id'].';')))
 			header('Location:future.php');
-		$r = mysqli_fetch_array($r);
+		$r = mysqli_fetch_array(mysqli_query(($db,'SELECT * FROM `TABLE_NAME_TO_BE_DONE` WHERE `id` ='.$_GET['id'].';'));
 		$method = $EDIT_BUTTON;
 	} else
 	if (isset($_POST['submit'])){
