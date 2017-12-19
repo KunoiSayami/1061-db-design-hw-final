@@ -1,11 +1,11 @@
 # 1062 Database Design Final Homework
 Database Design Final Homework: Message board (Website base)
 
-## Status finished
+## Status
 Finished
 
 ## Special Thanks
-Redblaze, seniors helped me test the feasibility of SQL injection
+Redblaze seniors helped me test the feasibility of SQL injection
 
 ## Project Target
 * Create a message board in website
