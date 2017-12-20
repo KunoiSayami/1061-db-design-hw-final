@@ -33,15 +33,15 @@
 		if (isset($_GET['id']))
 			test_func($_GET['id'],"Invalid `id` in get method");
 		else if ($_POST['submit'] == $EDIT_BUTTON && isset($_POST['id']))
-			test_func($_GET['id'],"Invalid `id` in post method");
+			test_func($_POST['id'],"Invalid `id` in post method");
 		else if (isset($_POST['delete']))
 			test_func($_POST['delete'],"Invalid `id` in post method");
 	} catch (InvalidData $e){
+		//print_r(get_defined_vars());
 		echo "Caught exception: ", $e->getMessage(),"\n</html>";
 		http_response_code(400);
 		die();
 	}
-
 
 	$db = mysqli_connect('localhost','php','root',$DATABASE_NAME);
 	mysqli_query($db,'SET NAMES utf8;');
@@ -50,14 +50,14 @@
 		if (isset($_GET['id'])){
 			if (!mysqli_fetch_array(mysqli_query($db,'SELECT * FROM '.$TABLE_NAME.' WHERE `id` = '.$_GET['id'].' ;')))
 			//echo $r;
-				header('Location:'.$FILE_NAME);
+				header('Location:'.$FILE_NAME.'#data');
 				//die();
 			$r = mysqli_fetch_array(mysqli_query($db,'SELECT * FROM '.$TABLE_NAME.' WHERE `id` = '.$_GET['id'].' ;'));
 			$method = $EDIT_BUTTON;
 		} 
 		else
 		if (isset($_POST['submit'])){
-			if ($_POST['submit'] == 'Clear Database'){
+			if (false && $_POST['submit'] == 'Clear Database'){
 				mysqli_query($db,'DELETE FROM '.$TABLE_NAME.';');
 				mysqli_query($db,'ALTER TABLE '.$TABLE_NAME.' AUTO_INCREMENT=1;');
 				header('Location:'.$FILE_NAME);
@@ -79,7 +79,7 @@
 					else if ($_POST['submit'] == $EDIT_BUTTON) 
 						mysqli_query($db,'UPDATE '.$TABLE_NAME.' SET `name` = \''.$name.'\', `email` = \''.$email.'\',`message` = \''.$msg.'\',`time` = CURRENT_TIMESTAMP WHERE `id` = '.$_POST['id'].' ;');
 					mysqli_commit($db);
-					header('Location:'.$FILE_NAME);
+					header('Location:'.$FILE_NAME.'#data');
 				} catch (InvalidData $e){
 					echo "Caught exception: ", $e->getMessage(),"\n</html>";
 					mysqli_close($db);
@@ -91,7 +91,7 @@
 		else
 			if (isset($_POST['delete'])){
 				mysqli_query($db,'DELETE FROM '.$TABLE_NAME.' WHERE `id` ='.$_POST['delete'].';');
-				header('Location:'.$FILE_NAME);
+				header('Location:'.$FILE_NAME.'#data');
 			}
 ?>
 <head>
@@ -113,17 +113,17 @@
 	</script>
 	<script>
 		function gets(id){
-			window.location.assign(window.location.pathname+'?id='+id);
+			window.location.assign(window.location.pathname+'?id='+id+'#postform');
 		}
 	</script>
 	<script>
 		function getsearch(str){
-			window.location.assign(window.location.pathname+'?search='+str);
+			window.location.assign(window.location.pathname+'?search='+str+'#data');
 		}
 	</script>
 	<script>
 		function reload(){
-			window.location.assign(window.location.pathname);
+			window.location.assign(window.location.pathname+'#data');
 		}
 	</script>
 	<meta charset="utf-8" />
@@ -145,15 +145,15 @@
 <strong><?php echo $USER_STRING; ?></strong><hr>
 <?php
 	//$s = mysqli_fetch_array($r);
-	echo "<form action=\"",$FILE_NAME,"\" method=\"post\">";
-	echo "姓名:  <input name=\"name\" type=\"text\" value=\"$r[1]\"/><br>";
-	echo "信箱:  <input name=\"email\" type=\"text\" value=\"$r[2]\"/><br>";
-	echo "訊息:  <input name=\"msg\" type=\"text\" value=\"$r[3]\"/><br>";
+	echo "<form id=\"postform\" action=\"",$FILE_NAME,"\" method=\"post\">";
+	echo "姓名:  <input name=\"name\" type=\"text\" value=\"$r[1]\"><br>";
+	echo "信箱:  <input name=\"email\" type=\"text\" value=\"$r[2]\"><br>";
+	echo "訊息:  <input name=\"msg\" type=\"text\" value=\"",replace_msg($r[3]),"\"><br>";
 	if ($method == $EDIT_BUTTON){
 		$id = $_GET['id'];
-		echo "<input type=\"hidden\" name=\"id\" value=\"$id\"/>";
+		echo "<input type=\"hidden\" name=\"id\" value=\"$id\">";
 	}
-	echo "<input type=\"submit\" name=\"submit\" value=\"$method\"/>      ";
+	echo "<input type=\"submit\" name=\"submit\" value=\"$method\">      ";
 ?>
 	<!--input type="submit" name="submit" value="Clear Database"--><br>
 <?php
@@ -169,7 +169,7 @@
 <hr>
 	<?php 
 		echo "<form action=\"",$FILE_NAME,"\" method=\"get\">";
-		echo "<table border=\"1\" bordercolor=\"#0000FF\" width=40%>\n";
+		echo "<table id=\"data\" border=\"1\" bordercolor=\"#0000FF\" width=40%>\n";
 		echo "<tr><td>姓名</td><td>信箱</td><td>訊息</td><td>時間</td><td>編輯</td></tr>\n";
 		while ($a = mysqli_fetch_array($r)){
 			echo "<tr>";
@@ -182,7 +182,7 @@
 			echo "<input type=\"button\" value=\"Delete\" onclick=\"sendsth($a[0])\"> ";
 			echo "</td></tr>\n";
 		}
-		echo "</table>\n<br>";
+		echo "</table></form>\n<br>";
 	?>
 	<form action=<?php echo "\"",$FILE_NAME,"\""?> method="get">
 		搜尋: <input type="text" name="search">
