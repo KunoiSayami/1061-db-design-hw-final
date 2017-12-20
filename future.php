@@ -26,6 +26,7 @@
 	$TABLE_NAME = '';
 	$EDIT_BUTTON = 'Post';
 	$POST_NEW_BUTTON = 'Insert';
+	$FILE_NAME = basename($_SERVER['PHP_SELF']);
 
 	// Data check
 	try {
@@ -49,7 +50,7 @@
 		if (isset($_GET['id'])){
 			if (!mysqli_fetch_array(mysqli_query($db,'SELECT * FROM '.$TABLE_NAME.' WHERE `id` = '.$_GET['id'].' ;')))
 			//echo $r;
-				header('Location:future.php');
+				header('Location:'.$FILE_NAME);
 				//die();
 			$r = mysqli_fetch_array(mysqli_query($db,'SELECT * FROM '.$TABLE_NAME.' WHERE `id` = '.$_GET['id'].' ;'));
 			$method = $EDIT_BUTTON;
@@ -59,7 +60,7 @@
 			if ($_POST['submit'] == 'Clear Database'){
 				mysqli_query($db,'DELETE FROM '.$TABLE_NAME.';');
 				mysqli_query($db,'ALTER TABLE '.$TABLE_NAME.' AUTO_INCREMENT=1;');
-				header('Location:future.php');
+				header('Location:'.$FILE_NAME);
 			} 
 			else
 			// Process post
@@ -78,7 +79,7 @@
 					else if ($_POST['submit'] == $EDIT_BUTTON) 
 						mysqli_query($db,'UPDATE '.$TABLE_NAME.' SET `name` = \''.$name.'\', `email` = \''.$email.'\',`message` = \''.$msg.'\',`time` = CURRENT_TIMESTAMP WHERE `id` = '.$_POST['id'].' ;');
 					mysqli_commit($db);
-					header('Location:future.php');
+					header('Location:'.$FILE_NAME);
 				} catch (InvalidData $e){
 					echo "Caught exception: ", $e->getMessage(),"\n</html>";
 					mysqli_close($db);
@@ -90,7 +91,7 @@
 		else
 			if (isset($_POST['delete'])){
 				mysqli_query($db,'DELETE FROM '.$TABLE_NAME.' WHERE `id` ='.$_POST['delete'].';');
-				header('Location:future.php');
+				header('Location:'.$FILE_NAME);
 			}
 ?>
 <head>
@@ -144,10 +145,10 @@
 <strong><?php echo $USER_STRING; ?></strong><hr>
 <?php
 	//$s = mysqli_fetch_array($r);
-	echo "<form action=\"future.php\" method=\"post\">";
+	echo "<form action=\"",$FILE_NAME,"\" method=\"post\">";
 	echo "姓名:  <input name=\"name\" type=\"text\" value=\"$r[1]\"/><br>";
-	echo "邮箱:  <input name=\"email\" type=\"text\" value=\"$r[2]\"/><br>";
-	echo "讯息:  <input name=\"msg\" type=\"text\" value=\"$r[3]\"/><br>";
+	echo "信箱:  <input name=\"email\" type=\"text\" value=\"$r[2]\"/><br>";
+	echo "訊息:  <input name=\"msg\" type=\"text\" value=\"$r[3]\"/><br>";
 	if ($method == $EDIT_BUTTON){
 		$id = $_GET['id'];
 		echo "<input type=\"hidden\" name=\"id\" value=\"$id\"/>";
@@ -167,7 +168,7 @@
 </form>
 <hr>
 	<?php 
-		echo "<form action=\"future.php\" method=\"get\">";
+		echo "<form action=\"",$FILE_NAME,"\" method=\"get\">";
 		echo "<table border=\"1\" bordercolor=\"#0000FF\" width=40%>\n";
 		echo "<tr><td>姓名</td><td>信箱</td><td>訊息</td><td>時間</td><td>編輯</td></tr>\n";
 		while ($a = mysqli_fetch_array($r)){
@@ -183,8 +184,8 @@
 		}
 		echo "</table>\n<br>";
 	?>
-	<form action="future.php" method="get">
-		搜寻: <input type="text" name="search">
+	<form action=<?php echo "\"",$FILE_NAME,"\""?> method="get">
+		搜尋: <input type="text" name="search">
 		<input type="button" value="search" onclick=getsearch(search.value)>
 	<input type="button" value="Show All" onclick=reload()>
 	</form>
