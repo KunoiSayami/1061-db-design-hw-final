@@ -1,5 +1,3 @@
-<!DOCTYPE html>
-
 <?php
 	// Variable settings
 	$USER_STRING = ""; // Show on user header
@@ -101,6 +99,7 @@
 				header('Location:'.$FILE_NAME.'#data');
 			}
 ?>
+<!DOCTYPE html>
 <html>
 <head>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
@@ -150,7 +149,7 @@
 	</style>
 </head>
 <body>
-<strong><?php echo $USER_STRING; ?></strong><hr>
+<center><strong><?php echo $USER_STRING; ?></strong><hr>
 <?php
 	//$s = mysqli_fetch_array($r);
 	echo "<form id=\"postform\" action=\"",$FILE_NAME,"\" method=\"post\">";
@@ -179,7 +178,7 @@
 		搜尋: <input type="text" name="search">
 		<input type="button" value="search" onclick=getsearch(search.value)>
 	<input type="button" value="Show All" onclick=reload()>
-	</form>
+	</form><br>
 	<?php 
 		echo "<form action=\"",$FILE_NAME,"\" method=\"get\">";
 		echo "<table id=\"data\" border=\"1\" bordercolor=\"#0000FF\">\n";
@@ -197,5 +196,6 @@
 		}
 		echo "</table></form>\n<br>";
 	?>
+	</center>
 </body>
 </html>
