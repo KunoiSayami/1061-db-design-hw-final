@@ -1,6 +1,22 @@
 <!DOCTYPE html>
-<html>
-	<?php
+
+<?php
+	// Variable settings
+	$USER_STRING = ""; // Show on user header
+	// Database Setting
+	$DATABASE_NAME = ''; 
+	$TABLE_NAME = '';
+	$DATABASE_LOCATION = 'localhost';
+	$DATABASE_USER_NAME = '';
+	$DATABASE_USER_PASSWORD = '';
+	// Button text setting
+	// Do not modify unless necessary
+	$EDIT_BUTTON = 'Post';
+	$POST_NEW_BUTTON = 'Insert';
+	// Self File name setting
+	// Do not modify unless necessary
+	$FILE_NAME = basename($_SERVER['PHP_SELF']);
+
 	class InvalidData extends Exception { }
 	$regex = '/^[a-zA-Z0-9]{1,10}$/';
 	$regex_email = '/^[a-zA-Z0-9@\.]{1,30}$/';
@@ -17,33 +33,25 @@
 	}
 	
 	function test_func($num,$errmsg){
-		if ( ! preg_match('/^\d+$/',$num) )
-			throw new InvalidData($errmsg);
+		if (isset($num))
+			if ( ! preg_match('/^\d+$/',$num) )
+				throw new InvalidData($errmsg);
 	}
-
-	$USER_STRING = "";
-	$DATABASE_NAME = '';
-	$TABLE_NAME = '';
-	$EDIT_BUTTON = 'Post';
-	$POST_NEW_BUTTON = 'Insert';
-	$FILE_NAME = basename($_SERVER['PHP_SELF']);
 
 	// Data check
 	try {
-		if (isset($_GET['id']))
-			test_func($_GET['id'],"Invalid `id` in get method");
-		else if ($_POST['submit'] == $EDIT_BUTTON && isset($_POST['id']))
+		test_func($_GET['id'],"Invalid `id` in get method");
+		test_func($_POST['delete'],"Invalid `id` in post method");
+		if ($_POST['submit'] == $EDIT_BUTTON)
 			test_func($_POST['id'],"Invalid `id` in post method");
-		else if (isset($_POST['delete']))
-			test_func($_POST['delete'],"Invalid `id` in post method");
 	} catch (InvalidData $e){
 		//print_r(get_defined_vars());
-		echo "Caught exception: ", $e->getMessage(),"\n</html>";
+		echo "<h1>Caught exception: ", $e->getMessage(),"</hl>";
 		http_response_code(400);
 		die();
 	}
 
-	$db = mysqli_connect('localhost','php','root',$DATABASE_NAME);
+	$db = mysqli_connect($DATABASE_LOCATION,$DATABASE_USER_NAME,$DATABASE_USER_PASSWORD,$DATABASE_NAME);
 	mysqli_query($db,'SET NAMES utf8;');
 	$method = $POST_NEW_BUTTON;
 	if (!isset($_GET['search']))
@@ -58,9 +66,9 @@
 		else
 		if (isset($_POST['submit'])){
 			if (false && $_POST['submit'] == 'Clear Database'){
-				mysqli_query($db,'DELETE FROM '.$TABLE_NAME.';');
+			/*	mysqli_query($db,'DELETE FROM '.$TABLE_NAME.';');
 				mysqli_query($db,'ALTER TABLE '.$TABLE_NAME.' AUTO_INCREMENT=1;');
-				header('Location:'.$FILE_NAME);
+				header('Location:'.$FILE_NAME);*/
 			} 
 			else
 			// Process post
@@ -72,8 +80,7 @@
 						throw new InvalidData('Invalid field `email`');
 					$name = $_POST['name'];
 					$email = $_POST['email'];
-					$msg = sql_replace_msg($_POST['msg']);//str_replace('`','\`',str_replace('\\','\\\\',str_replace('\'','\'\'',$_POST['msg'])));
-					//echo 'INSERT INTO '.$TABLE_NAME.' (`name`,`email`,`message`) VALUES ('.$name.','.$email.','.$msg.');';
+					$msg = sql_replace_msg($_POST['msg']);
 					if ($_POST['submit'] == $POST_NEW_BUTTON)
 						mysqli_query($db,'INSERT INTO '.$TABLE_NAME.' (`name`,`email`,`message`,`time`) VALUES (\''.$name.'\',\''.$email.'\',\''.$msg.'\',CURRENT_TIMESTAMP);');
 					else if ($_POST['submit'] == $EDIT_BUTTON) 
@@ -81,7 +88,7 @@
 					mysqli_commit($db);
 					header('Location:'.$FILE_NAME.'#data');
 				} catch (InvalidData $e){
-					echo "Caught exception: ", $e->getMessage(),"\n</html>";
+					echo "<h1>Caught exception: ", $e->getMessage(),"</hl>";
 					mysqli_close($db);
 					http_response_code(400);
 					//exit(0);
@@ -94,6 +101,7 @@
 				header('Location:'.$FILE_NAME.'#data');
 			}
 ?>
+<html>
 <head>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 	<script>
@@ -167,9 +175,14 @@
 ?>
 </form>
 <hr>
+	<form action=<?php echo "\"",$FILE_NAME,"\""?> method="get">
+		搜尋: <input type="text" name="search">
+		<input type="button" value="search" onclick=getsearch(search.value)>
+	<input type="button" value="Show All" onclick=reload()>
+	</form>
 	<?php 
 		echo "<form action=\"",$FILE_NAME,"\" method=\"get\">";
-		echo "<table id=\"data\" border=\"1\" bordercolor=\"#0000FF\" width=40%>\n";
+		echo "<table id=\"data\" border=\"1\" bordercolor=\"#0000FF\">\n";
 		echo "<tr><td>姓名</td><td>信箱</td><td>訊息</td><td>時間</td><td>編輯</td></tr>\n";
 		while ($a = mysqli_fetch_array($r)){
 			echo "<tr>";
@@ -184,10 +197,5 @@
 		}
 		echo "</table></form>\n<br>";
 	?>
-	<form action=<?php echo "\"",$FILE_NAME,"\""?> method="get">
-		搜尋: <input type="text" name="search">
-		<input type="button" value="search" onclick=getsearch(search.value)>
-	<input type="button" value="Show All" onclick=reload()>
-	</form>
 </body>
 </html>

@@ -26,7 +26,7 @@ USE `comm`;
 DROP TABLE IF EXISTS `base`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `tbA5230422` (
+CREATE TABLE `base` (
 	`id` INT(11) NOT NULL AUTO_INCREMENT,
 	`name` VARCHAR(10) NULL DEFAULT NULL COLLATE 'utf8_unicode_ci',
 	`email` VARCHAR(30) NULL DEFAULT NULL COLLATE 'utf8_unicode_ci',
